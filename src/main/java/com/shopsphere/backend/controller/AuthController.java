@@ -57,7 +57,7 @@ public class AuthController {
 		
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		user.setRole("USER");
-		user.setVerified(false);
+		user.setVerified(true);
 		user.setCreatedAt(LocalDateTime.now());
 		
 		userRepository.save(user);
@@ -118,7 +118,7 @@ public class AuthController {
 	    }
 
 	    User user = userRepository.findByEmail(email);
-	    user.setVerified(false);
+	    user.setVerified(true);
 	    userRepository.save(user);
 	    
 	    otpRepository.deleteByEmail(email);
