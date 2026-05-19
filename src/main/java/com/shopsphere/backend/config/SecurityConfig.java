@@ -60,10 +60,11 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOriginPatterns(List.of("https://shopsphere-frontend-git-main-rohit-topagi-s-projects.vercel.app"));
+        config.setAllowedOrigins(List.of("https://shopsphere-frontend-git-main-rohit-topagi-s-projects.vercel.app"));
         
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
