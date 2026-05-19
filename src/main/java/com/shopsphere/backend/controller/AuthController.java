@@ -68,7 +68,7 @@ public class AuthController {
 		otpRepository.deleteByEmail(email);
 		
 		otpRepository.save(otpEntity);
-		emailService.sendOtp(email, otp);
+//		emailService.sendOtp(email, otp);
 		
 		return "User Resgistered Successfully";
 	}
