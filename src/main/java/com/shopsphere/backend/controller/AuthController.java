@@ -118,7 +118,7 @@ public class AuthController {
 	    }
 
 	    User user = userRepository.findByEmail(email);
-	    user.setVerified(true);
+	    user.setVerified(false);
 	    userRepository.save(user);
 	    
 	    otpRepository.deleteByEmail(email);
