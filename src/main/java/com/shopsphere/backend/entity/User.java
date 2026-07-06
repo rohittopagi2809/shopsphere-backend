@@ -3,7 +3,7 @@ package com.shopsphere.backend.entity;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,6 +23,7 @@ public class User {
 	@Column(unique = true)
 	private String email;
 	@Column
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
 	@Column
 	private String role;
@@ -109,7 +110,7 @@ public class User {
 	}
 
 	public boolean isVerified() {
-		return verified;
+		return Boolean.TRUE.equals(verified);
 	}
 
 	public void setVerified(boolean verified) {

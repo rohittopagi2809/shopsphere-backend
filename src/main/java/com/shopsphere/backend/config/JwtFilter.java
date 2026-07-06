@@ -1,7 +1,6 @@
 package com.shopsphere.backend.config;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

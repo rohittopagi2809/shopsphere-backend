@@ -23,6 +23,7 @@ import com.shopsphere.backend.repository.ProductRepository;
 import com.shopsphere.backend.repository.UserRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -44,50 +45,101 @@ public class OrderController {
 	private OrderItemRepository orderItemRepository;
 	
 	@PostMapping
+	@Transactional
 	public Order placeOrder(HttpServletRequest request) {
-		
-		String email = (String) request.getAttribute("email");
-		User user = userRepository.findByEmail(email);
-		Integer userId = user.getId();
-		
-		List<CartItem> cartItems = cartRepository.findByUserId(userId);
-		
-		double total = 0;
-		
-		for (CartItem item : cartItems) {
-			Product product = productRepository.findById(item.getProduct().getId())
-					.orElseThrow(() -> new RuntimeException("Product not found"));
-			
-			total += item.getQuantity() * product.getPrice();
-		}
-		
-		Order order = new Order(userId, total, "PLACED");
-		
-		// Time
-		order.setCreatedAt(LocalDateTime.now());
-		
-		// Save order
-		Order  savedOrder = orderRepository.save(order);
-		
-		// Save Order Items
-		for (CartItem item : cartItems) {
-			Product product = productRepository.findById(item.getProduct().getId()).get();
-			
-			OrderItem orderItem = new OrderItem(
-					savedOrder.getId(),
-					item.getProduct().getId(),
-					item.getQuantity(),
-					product.getPrice(),
-					product.getName(),
-					product.getImageUrl()
-				); 
-			orderItemRepository.save(orderItem);
-		}
-		
-		// Clear cart
-		cartRepository.deleteAll(cartItems);
-		
-		return savedOrder;
+
+	    String email = (String) request.getAttribute("email");
+
+	    User user = userRepository.findByEmail(email);
+
+	    if (user == null) {
+	        throw new RuntimeException("User not found");
+	    }
+
+	    Integer userId = user.getId();
+
+	    List<CartItem> cartItems =
+	            cartRepository.findByUserId(userId);
+
+	    if (cartItems.isEmpty()) {
+	        throw new RuntimeException("Cart is empty");
+	    }
+
+	    double total = 0;
+
+	    // CHECK STOCK AND CALCULATE TOTAL
+	    for (CartItem item : cartItems) {
+
+	        Product product = productRepository
+	                .findById(item.getProduct().getId())
+	                .orElseThrow(
+	                        () -> new RuntimeException(
+	                                "Product not found"
+	                        )
+	                );
+
+	        if (product.getStock() < item.getQuantity()) {
+	            throw new RuntimeException(
+	                    "Insufficient stock for "
+	                    + product.getName()
+	            );
+	        }
+
+	        total +=
+	                item.getQuantity()
+	                * product.getPrice();
+	    }
+
+	    // CREATE ORDER
+	    Order order = new Order(
+	            userId,
+	            total,
+	            "PLACED"
+	    );
+
+	    order.setCreatedAt(
+	            LocalDateTime.now()
+	    );
+
+	    Order savedOrder =
+	            orderRepository.save(order);
+
+	    // SAVE ORDER ITEMS AND REDUCE STOCK
+	    for (CartItem item : cartItems) {
+
+	        Product product = productRepository
+	                .findById(item.getProduct().getId())
+	                .orElseThrow(
+	                        () -> new RuntimeException(
+	                                "Product not found"
+	                        )
+	                );
+
+	        OrderItem orderItem =
+	                new OrderItem(
+	                        savedOrder.getId(),
+	                        product.getId(),
+	                        item.getQuantity(),
+	                        product.getPrice(),
+	                        product.getName(),
+	                        product.getImageUrl()
+	                );
+
+	        orderItemRepository.save(orderItem);
+
+	        // REDUCE PRODUCT STOCK
+	        product.setStock(
+	                product.getStock()
+	                - item.getQuantity()
+	        );
+
+	        productRepository.save(product);
+	    }
+
+	    // CLEAR CART
+	    cartRepository.deleteAll(cartItems);
+
+	    return savedOrder;
 	}
 	
 	@GetMapping

@@ -1,7 +1,6 @@
 package com.shopsphere.backend.controller;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +56,7 @@ public class AuthController {
 		
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		user.setRole("USER");
-		user.setVerified(true);
+		user.setVerified(false);
 		user.setCreatedAt(LocalDateTime.now());
 		
 		userRepository.save(user);
@@ -68,7 +67,7 @@ public class AuthController {
 		otpRepository.deleteByEmail(email);
 		
 		otpRepository.save(otpEntity);
-//		emailService.sendOtp(email, otp);
+		emailService.sendOtp(email, otp);
 		
 		return "User Resgistered Successfully";
 	}
@@ -79,7 +78,7 @@ public class AuthController {
 	public ResponseEntity<?> loginUser(@RequestBody User user) {
 		String email = user.getEmail().toLowerCase();
 		
-		User existingUser = userRepository.findByEmail(user.getEmail());
+		User existingUser = userRepository.findByEmail(email);
 		
 		if (existingUser == null) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "User not found. Please register first"));
@@ -128,12 +127,32 @@ public class AuthController {
 	
 	@PostMapping("/resend")
 	public String resendOtp(@RequestParam String email) {
-		String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
-		Otp otpEntity = new Otp(email, otp, LocalDateTime.now().plusMinutes(5));
-		otpRepository.save(otpEntity);
-		emailService.sendOtp(email, otp);
-		
-		return "OTP resent";
+
+	    email = email.toLowerCase();
+
+	    User user = userRepository.findByEmail(email);
+
+	    if (user == null) {
+	        throw new RuntimeException("User not found");
+	    }
+
+	    String otp = String.valueOf(
+	        (int) (Math.random() * 900000) + 100000
+	    );
+
+	    Otp otpEntity = new Otp(
+	        email,
+	        otp,
+	        LocalDateTime.now().plusMinutes(5)
+	    );
+
+	    otpRepository.deleteByEmail(email);
+
+	    otpRepository.save(otpEntity);
+
+	    emailService.sendOtp(email, otp);
+
+	    return "OTP resent";
 	}
 	
 	@GetMapping("/me")

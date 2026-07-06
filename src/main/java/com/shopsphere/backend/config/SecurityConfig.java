@@ -33,8 +33,7 @@ public class SecurityConfig {
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			
 			.sessionManagement(session -> 
-			session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			)
+			session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			
 			.authorizeHttpRequests(auth -> auth
 					
@@ -42,7 +41,6 @@ public class SecurityConfig {
 				.requestMatchers("/api/auth/**").permitAll() // allow login/register
 				.requestMatchers("/api/admin/dashboard/**").hasRole("ADMIN")
 				.requestMatchers("/api/admin/orders", "/api/admin/orders/**").hasRole("ADMIN")
-				.requestMatchers("/api/products/**").permitAll()
 				.requestMatchers("/uploads/**").permitAll()
 				.requestMatchers(HttpMethod.GET,"/api/products/**").permitAll()
 				.requestMatchers(HttpMethod.POST,"/api/products/**").hasRole("ADMIN")
@@ -60,7 +58,7 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("https://shopsphere-frontend-git-main-rohit-topagi-s-projects.vercel.app"));
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
         
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));

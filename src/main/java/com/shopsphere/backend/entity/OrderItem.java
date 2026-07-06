@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "order_items")
@@ -23,7 +22,7 @@ public class OrderItem {
 	private int quantity;
 	@Column
 	private double price;
-	@Transient
+	@Column
 	private String productName;
 	@Column
 	private String imageUrl;

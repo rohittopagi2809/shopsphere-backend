@@ -9,4 +9,6 @@ import com.shopsphere.backend.entity.CartItem;
 public interface CartRepository extends JpaRepository<CartItem, Integer> {
 	
 	List<CartItem> findByUserId(Integer userId);
+	
+	CartItem findByUserIdAndProduct_Id(Integer userId, Integer productId);
 }

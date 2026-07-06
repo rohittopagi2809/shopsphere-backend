@@ -110,29 +110,60 @@ public class ProductController {
 	}
 	
 	@PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public Product updateProduct(@PathVariable Integer id, 
-			@RequestParam String name, 
-			@RequestParam Double price,
-			@RequestParam int stock,
-			@RequestParam String category,
-			@RequestParam(required = false) MultipartFile image) throws IOException {
-		Product product = productRepository.findById(id).orElseThrow();
-		product.setName(name);
-		product.setPrice(price);
-		product.setStock(stock);
-		product.setCategory(category);
-		
-		if (image != null && !image.isEmpty()) {
-			String imageName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
-			Path uploadPath = Paths.get("uploads");
-			if (!Files.exists(uploadPath)) {
-				Files.createDirectories(uploadPath);
-			}
-			Files.copy(image.getInputStream(), uploadPath.resolve(imageName), StandardCopyOption.REPLACE_EXISTING);
-			product.setImageUrl(imageName);
-		}
-		
-		return productRepository.save(product);		
+	public Product updateProduct(
+	        @PathVariable Integer id,
+	        @RequestParam String name,
+	        @RequestParam Double price,
+	        @RequestParam int stock,
+	        @RequestParam String category,
+	        @RequestParam(required = false) MultipartFile image,
+	        HttpServletRequest request) throws IOException {
+
+	    String role = (String) request.getAttribute("role");
+
+	    if (!"ADMIN".equals(role)) {
+	        throw new RuntimeException(
+	                "Only ADMIN can update products"
+	        );
+	    }
+
+	    Product product = productRepository
+	            .findById(id)
+	            .orElseThrow(
+	                    () -> new RuntimeException(
+	                            "Product not found"
+	                    )
+	            );
+
+	    product.setName(name);
+	    product.setPrice(price);
+	    product.setStock(stock);
+	    product.setCategory(category);
+
+	    if (image != null && !image.isEmpty()) {
+
+	        String imageName =
+	                System.currentTimeMillis()
+	                + "_"
+	                + image.getOriginalFilename();
+
+	        Path uploadPath =
+	                Paths.get("uploads");
+
+	        if (!Files.exists(uploadPath)) {
+	            Files.createDirectories(uploadPath);
+	        }
+
+	        Files.copy(
+	                image.getInputStream(),
+	                uploadPath.resolve(imageName),
+	                StandardCopyOption.REPLACE_EXISTING
+	        );
+
+	        product.setImageUrl(imageName);
+	    }
+
+	    return productRepository.save(product);
 	}
 	
 }

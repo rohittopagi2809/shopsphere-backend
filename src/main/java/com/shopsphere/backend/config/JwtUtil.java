@@ -1,7 +1,6 @@
 package com.shopsphere.backend.config;
 
 import java.util.Date;
-import io.jsonwebtoken.*;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
